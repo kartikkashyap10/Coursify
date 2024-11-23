@@ -1,13 +1,26 @@
 const express = require("express");
-const app = express();
-const port = 3000;
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config();
+const port = process.env.PORT;
 
 const { userRouter } = require("./routes/user.js");
 const { courseRouter } = require("./routes/course.js");
+const { adminRouter } = require("./routes/admin.js");
 
-app.use("/user", userRouter);
-app.use("/course", courseRouter);
+const app = express();
 
-app.listen(port, () => {
-    console.log(`server up on port ${port}`);
-}); 
+app.use("api/v1/user", userRouter);
+app.use("api/v1/course", courseRouter);
+app.use("api/v1/admin", adminRouter);
+
+async function main() {
+    await mongoose.connect(process.env.DB_URL);
+    console.log("Database connected");
+    app.listen(port, () => {
+        console.log(`server up on port ${port}`);
+    }); 
+}
+
+main();
+

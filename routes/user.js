@@ -1,6 +1,7 @@
 const { Router } = require("express");
-const userRouter = Router();
+const { user } = require("../db.js");
 
+const userRouter = Router();
 userRouter.post("/user/signup", () => {
     res.json({
         message: "Signup endpoint"
@@ -18,7 +19,6 @@ userRouter.get("user/purchases", () => {
         message: "Signin endpoint"
     });
 });
-
 
 module.exports = {
     userRouter: userRouter
