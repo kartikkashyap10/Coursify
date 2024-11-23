@@ -2,21 +2,11 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
-createUserRoutes = require("./user.js");
+const { userRouter } = require("./routes/user.js");
+const { courseRouter } = require("./routes/course.js");
 
-createUserRoutes(app);
-
-app.post("/course/purchase", () => {
-    res.json({
-        message: "Signin endpoint"
-    });
-});
-
-app.get("/course/preview", () => {
-    res.json({
-        message: "Signin endpoint"
-    });
-});
+app.use("/user", userRouter);
+app.use("/course", courseRouter);
 
 app.listen(port, () => {
     console.log(`server up on port ${port}`);
