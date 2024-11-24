@@ -159,16 +159,80 @@ adminRouter.post("/course", async (req, res) => {
     }
 });
 
-adminRouter.put("/course", (req, res) => {
-    res.send({
-        message: "Admin edit course endpoint"
-    });
+adminRouter.put("/course", async (req, res) => {
+    try {
+        // Input validation
+        const courseBody = z.object({
+            tite: z.string().min(5).max(100),
+            description: z.string().min(5).max(200),
+            price: z.number(),
+            imageUrl: z.string(),
+            courseId: z.string()
+        });
+
+        const { success, data } = courseBody.safeParse(req.body);
+        if (!success) {
+            res.status(StatusCodes).json({
+                message: "Invalid input"
+            });
+            return;
+        }
+
+        creatorId = req.id;
+        // check to make sure the course belongs to the creator trying to update it
+        const courseExists = CourseModel.findOne({
+            _id: courseId,
+            creatorId: creatorId
+        });
+
+        if (!courseExists) {
+            res.status(StatusCodes.FORBIDDEN).json({
+                message: "Not allowed"
+            });
+            return;
+        }
+
+        const { title, description, price, imageUrl } = data;
+
+        await CourseModel.updateOne({
+            _id: courseId
+        }, {
+            title: title,
+            description: description,
+            price: price,
+            imageUrl: imageUrl,
+            creatorId: creatorId
+        });
+
+        res.status(StatusCodes.OK).json({
+            message: "Successful"
+        });
+    } catch (e) {
+        console.error(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Something went wrong"
+        });
+    }
 });
 
-adminRouter.get("/course/bulk", (req, res) => {
-    res.send({
-        message: "Admin get courses created endpoint"
-    });
+adminRouter.get("/course/bulk", async (req, res) => {
+    try {
+        const creatorId = req.id;
+
+        const courses = await CourseModel.find({
+            _id: creatorId
+        });
+
+        res.status(StatusCodes.OK).json({
+            message: "OK",
+            data: courses
+        });
+    } catch(e) {
+        console.error(e);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            message: "Something went wrong"
+        });
+    }
 });
 
 module.exports = {
