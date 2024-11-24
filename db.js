@@ -7,43 +7,67 @@ dotenv.config();
 
 const ObjectId = Schema.ObjectId;
 
+const connectToDatabase = async () => {
+    try {
+        await mongoose.connect(process.env.DB_URL)
+        console.log("Database connected");
+    } catch(error) {
+        console.error(error);
+        console.log("Database Connection failed");
+        process.exit(1);
+    }
+}
+
 // Schemas
-const User = new Schema({
+const UserSchema = new Schema({
     email: { type: String, unique: true },
     password: String,
     firstName: String,
     lastName: String
 });
 
-const Admin = new Schema({
+const AdminSchema = new Schema({
     email: { type: String, unique: true },
     password: String,
     firstName: String,
     lastName: String
 });
 
-const Course = new Schema({
+const CourseSchema = new Schema({
     title: String,
     description: String,
     price: Number,
     imageUrl: String,
-    creatorId: { type: ObjectId, refers: Admin._id}
+    creatorId: { 
+        type: ObjectId, 
+        refers: 'Admin',
+        required: true
+    }
 });
 
-const Purchase = new Schema({
-    courseId: {type: ObjectId, refers: Course._id},
-    userId: { type: ObjectId, refers: User._id}
+const PurchaseSchema = new Schema({
+    courseId: {
+        type: ObjectId, 
+        refers: 'Course', // Refers to the Course model
+        required: true
+    },
+    userId: {
+        type: ObjectId, 
+        refers: 'User', // Refers to the User model
+        required: true
+    }
 });
 
 // models (collections)
-const user = model("user", User);
-const admin = model("admin", Admin);
-const course = model("course", Course);
-const purchase = model("purchase", Purchase);
+const UserModel = model("user", UserSchema);
+const AdminModel = model("admin", AdminSchema);
+const CourseModel = model("course", CourseSchema);
+const PurchaseMdodel = model("purchase", PurchaseSchema);
 
 module.exports = {
-    user,
-    admin,
-    course,
-    purchase
+    UserModel,
+    AdminModel,
+    CourseModel,
+    PurchaseMdodel,
+    connectToDatabase
 }
